@@ -1,0 +1,11 @@
+.git
+.gitignore
+.dockerignore
+.editorconfig
+.vscode
+.idea
+.env
+.env.*
+setup.sql
+readme.rst
+*.md

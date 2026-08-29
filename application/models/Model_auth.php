@@ -1,11 +1,14 @@
 <?php 
-class modelauth extends CI_Model{
-    function __construct()
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Model_auth extends CI_Model {
+    public function __construct()
     {
         parent::__construct();
     }
-    function register($data){
-        $this->db->insert('tb_user',$data);
+
+    public function register($data)
+    {
+        return $this->db->insert('tb_user', $data);
     }
 }
-?>
