@@ -29,7 +29,7 @@ RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
 
-ENV PORT 8080
-EXPOSE 8080 8081 8082 8083
+# PORT is injected dynamically by Cloud Run — do NOT hardcode it here
+EXPOSE 8080
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
