@@ -2,11 +2,27 @@
 set -e
 
 TARGET_PORT="${PORT:-8080}"
-echo "Configuring Apache to listen on port ${TARGET_PORT}..."
+echo "Configuring Apache for Cloud Run on port ${TARGET_PORT}..."
 
-# Update Apache port configurations dynamically at runtime
-sed -i "s/Listen [0-9]*/Listen ${TARGET_PORT}/g" /etc/apache2/ports.conf
-sed -i "s/<VirtualHost \*:[0-9]*>/<VirtualHost \*:${TARGET_PORT}>/g" /etc/apache2/sites-available/000-default.conf
+# Cleanly rewrite ports.conf
+echo "Listen ${TARGET_PORT}" > /etc/apache2/ports.conf
+
+# Cleanly configure default VirtualHost
+cat <<EOF > /etc/apache2/sites-available/000-default.conf
+<VirtualHost *:${TARGET_PORT}>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+
+    <Directory /var/www/html>
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+EOF
 
 echo "Starting Apache web server on port ${TARGET_PORT}..."
 exec apache2-foreground
