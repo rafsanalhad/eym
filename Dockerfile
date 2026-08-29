@@ -15,19 +15,21 @@ RUN apt-get update && apt-get install -y \
 # Enable Apache mod_rewrite for CI3 URL routing
 RUN a2enmod rewrite
 
-# Configure Apache to listen on Cloud Run $PORT (default 8080) and AllowOverride All
-RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf \
-    && sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+# Configure Apache AllowOverride All for .htaccess
+RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
 # Copy project files
 WORKDIR /var/www/html
 COPY . /var/www/html/
 
-# Set correct permissions
-RUN chown -R www-data:www-data /var/www/html \
+# Copy entrypoint script and set permissions
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh \
+    && chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
 
 ENV PORT 8080
-EXPOSE 8080
+EXPOSE 8080 8081 8082 8083
 
-CMD ["apache2-foreground"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
